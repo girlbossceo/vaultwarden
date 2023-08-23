@@ -36,13 +36,6 @@
 // If you go above 128 it will cause rust-analyzer to fail,
 #![recursion_limit = "103"]
 
-// When enabled use MiMalloc as malloc instead of the default malloc
-#[cfg(feature = "enable_mimalloc")]
-use mimalloc::MiMalloc;
-#[cfg(feature = "enable_mimalloc")]
-#[cfg_attr(feature = "enable_mimalloc", global_allocator)]
-static GLOBAL: MiMalloc = MiMalloc;
-
 #[macro_use]
 extern crate rocket;
 #[macro_use]
