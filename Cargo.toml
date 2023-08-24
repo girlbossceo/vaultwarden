@@ -166,6 +166,11 @@ rocket = { git = 'https://github.com/SergioBenitez/Rocket', rev = 'ce441b5f46fdf
 strip = "symbols"
 lto = "fat"
 codegen-units = 1
+incremental = false
+opt-level = 3
+overflow-checks = true
+panic = "abort"
+
 
 # Always build argon2 using opt-level 3
 # This is a huge speed improvement during testing
