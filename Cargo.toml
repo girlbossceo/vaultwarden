@@ -133,8 +133,8 @@ bytes = "1.4.0"
 cached = "0.44.0"
 
 # Used for custom short lived cookie jar during favicon extraction
-cookie = "0.16.2"
-cookie_store = "0.19.1"
+cookie = "0.17.0"
+cookie_store = "0.20.0"
 
 # Used by U2F, JWT and PostgreSQL
 openssl = "0.10.57"
