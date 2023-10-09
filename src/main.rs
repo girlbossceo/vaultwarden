@@ -225,7 +225,7 @@ fn launch_info() {
         |   https://github.com/dani-garcia/vaultwarden/discussions or        |\n\
         |   https://vaultwarden.discourse.group/                             |\n\
         | Report suspected bugs/issues in the software itself at:            |\n\
-        |   https://github.com/dani-garcia/vaultwarden/issues/new            |\n\
+        |   https://git.plus.st/plus-st/vaultwarden/-/issues/new             |\n\
         \\--------------------------------------------------------------------/\n"
     );
 }
@@ -254,6 +254,13 @@ fn init_logging(level: log::LevelFilter) -> Result<(), fern::InitError> {
         log::LevelFilter::Off
     };
 
+    // Only show handlebar logs when the level is Trace
+    let handlebars_level = if level >= log::LevelFilter::Trace {
+        log::LevelFilter::Trace
+    } else {
+        log::LevelFilter::Warn
+    };
+
     let mut logger = fern::Dispatch::new()
         .level(level)
         // Hide unknown certificate errors if using self-signed
@@ -275,6 +282,8 @@ fn init_logging(level: log::LevelFilter) -> Result<(), fern::InitError> {
         .level_for("rocket::shield::shield", log::LevelFilter::Warn)
         .level_for("hyper::proto", log::LevelFilter::Off)
         .level_for("hyper::client", log::LevelFilter::Off)
+        // Filter handlebars logs
+        .level_for("handlebars::render", handlebars_level)
         // Prevent cookie_store logs
         .level_for("cookie_store", log::LevelFilter::Off)
         // Variable level for trust-dns used by reqwest
