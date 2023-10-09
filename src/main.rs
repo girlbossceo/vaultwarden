@@ -225,7 +225,7 @@ fn launch_info() {
         |   https://github.com/dani-garcia/vaultwarden/discussions or        |\n\
         |   https://vaultwarden.discourse.group/                             |\n\
         | Report suspected bugs/issues in the software itself at:            |\n\
-        |   https://github.com/dani-garcia/vaultwarden/issues/new            |\n\
+        |   https://git.plus.st/plus-st/vaultwarden/-/issues/new             |\n\
         \\--------------------------------------------------------------------/\n"
     );
 }
