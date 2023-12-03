@@ -10,7 +10,7 @@ use rocket::{
 use serde_json::Value;
 
 use crate::{
-    api::{self, core::log_event, EmptyResult, JsonResult, JsonUpcase, Notify, PasswordData, UpdateType},
+    api::{self, core::log_event, EmptyResult, JsonResult, JsonUpcase, Notify, PasswordOrOtpData, UpdateType},
     auth::Headers,
     crypto,
     db::{models::*, DbConn, DbPool},
@@ -206,12 +206,13 @@ pub struct CipherData {
     // TODO: Some of these might appear all the time, no need for Option
     OrganizationId: Option<String>,
 
+    Key: Option<String>,
+
     /*
     Login = 1,
     SecureNote = 2,
     Card = 3,
-    Identity = 4,
-    Fido2Key = 5
+    Identity = 4
     */
     pub Type: i32,
     pub Name: String,
@@ -223,7 +224,6 @@ pub struct CipherData {
     SecureNote: Option<Value>,
     Card: Option<Value>,
     Identity: Option<Value>,
-    Fido2Key: Option<Value>,
 
     Favorite: Option<bool>,
     Reprompt: Option<i32>,
@@ -359,14 +359,17 @@ pub async fn update_cipher_from_data(
     enforce_personal_ownership_policy(Some(&data), headers, conn).await?;
 
     // Check that the client isn't updating an existing cipher with stale data.
-    if let Some(dt) = data.LastKnownRevisionDate {
-        match NaiveDateTime::parse_from_str(&dt, "%+") {
-            // ISO 8601 format
-            Err(err) => warn!("Error parsing LastKnownRevisionDate '{}': {}", dt, err),
-            Ok(dt) if cipher.updated_at.signed_duration_since(dt).num_seconds() > 1 => {
-                err!("The client copy of this cipher is out of date. Resync the client and try again.")
+    // And only perform this check when not importing ciphers, else the date/time check will fail.
+    if ut != UpdateType::None {
+        if let Some(dt) = data.LastKnownRevisionDate {
+            match NaiveDateTime::parse_from_str(&dt, "%+") {
+                // ISO 8601 format
+                Err(err) => warn!("Error parsing LastKnownRevisionDate '{}': {}", dt, err),
+                Ok(dt) if cipher.updated_at.signed_duration_since(dt).num_seconds() > 1 => {
+                    err!("The client copy of this cipher is out of date. Resync the client and try again.")
+                }
+                Ok(_) => (),
             }
-            Ok(_) => (),
         }
     }
 
@@ -466,7 +469,6 @@ pub async fn update_cipher_from_data(
         2 => data.SecureNote,
         3 => data.Card,
         4 => data.Identity,
-        5 => data.Fido2Key,
         _ => err!("Invalid type"),
     };
 
@@ -483,6 +485,7 @@ pub async fn update_cipher_from_data(
         None => err!("Data missing"),
     };
 
+    cipher.key = data.Key;
     cipher.name = data.Name;
     cipher.notes = data.Notes;
     cipher.fields = data.Fields.map(|f| _clean_cipher_data(f).to_string());
@@ -1454,19 +1457,15 @@ struct OrganizationId {
 #[post("/ciphers/purge?<organization..>", data = "<data>")]
 async fn delete_all(
     organization: Option<OrganizationId>,
-    data: JsonUpcase<PasswordData>,
+    data: JsonUpcase<PasswordOrOtpData>,
     headers: Headers,
     mut conn: DbConn,
     nt: Notify<'_>,
 ) -> EmptyResult {
-    let data: PasswordData = data.into_inner().data;
-    let password_hash = data.MasterPasswordHash;
-
+    let data: PasswordOrOtpData = data.into_inner().data;
     let mut user = headers.user;
 
-    if !user.check_valid_password(&password_hash) {
-        err!("Invalid password")
-    }
+    data.validate(&user, true, &mut conn).await?;
 
     match organization {
         Some(org_data) => {
