@@ -114,7 +114,7 @@ impl Fairing for AppHeaders {
 
         // Disable cache unless otherwise specified
         if !res.headers().contains("cache-control") {
-            res.set_raw_header("Cache-Control", "no-cache, no-store, max-age=0");
+            res.set_raw_header("Cache-Control", "no-cache,no-store,max-age=0");
         }
     }
 }
