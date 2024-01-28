@@ -168,13 +168,29 @@ rpassword = "7.3.1"
 # The symbols are the provide better panic traces
 # Also enable fat LTO and use 1 codegen unit for optimizations
 [profile.release]
-strip = "debuginfo"
+strip = "symbols"
 lto = "fat"
+codegen-units = 1
+debug = 0
+panic = "abort"
+overflow-checks = true
+incremental = false
+
+# For releases also try to max optimizations for dependencies:
+[profile.release.build-override]
+debug = 0
+opt-level = 3
+codegen-units = 1
+
+[profile.release.package."*"]
+debug = 0
+opt-level = 3
 codegen-units = 1
 
 
 # A little bit of a speedup
 [profile.dev]
+debug = 0
 split-debuginfo = "unpacked"
 
 # Always build argon2 using opt-level 3
