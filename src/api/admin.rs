@@ -598,7 +598,7 @@ async fn get_json_api<T: DeserializeOwned>(url: &str) -> Result<T, Error> {
 async fn has_http_access() -> bool {
     let http_access = get_reqwest_client();
 
-    match http_access.head("https://github.com/dani-garcia/vaultwarden").send().await {
+    match http_access.head("https://github.com/girlbossceo/vaultwarden").send().await {
         Ok(r) => r.status().is_success(),
         _ => false,
     }
