@@ -168,8 +168,10 @@ pub fn static_files(filename: &str) -> Result<(ContentType, &'static [u8]), Erro
         "admin_diagnostics.js" => {
             Ok((ContentType::JavaScript, include_bytes!("../static/scripts/admin_diagnostics.js")))
         }
-        "bootstrap.css" => Ok((ContentType::CSS, include_bytes!("../static/scripts/bootstrap.css"))),
-        "bootstrap.bundle.js" => Ok((ContentType::JavaScript, include_bytes!("../static/scripts/bootstrap.bundle.js"))),
+        "bootstrap.css" => Ok((ContentType::CSS, include_bytes!("../static/scripts/bootstrap.min.css"))),
+        "bootstrap.min.css" => Ok((ContentType::CSS, include_bytes!("../static/scripts/bootstrap.min.css"))),
+        "bootstrap.bundle.min.js" => Ok((ContentType::JavaScript, include_bytes!("../static/scripts/bootstrap.bundle.min.js"))),
+        "bootstrap.bundle.js" => Ok((ContentType::JavaScript, include_bytes!("../static/scripts/bootstrap.bundle.min.js"))),
         "jdenticon.js" => Ok((ContentType::JavaScript, include_bytes!("../static/scripts/jdenticon.js"))),
         "datatables.js" => Ok((ContentType::JavaScript, include_bytes!("../static/scripts/datatables.js"))),
         "datatables.css" => Ok((ContentType::CSS, include_bytes!("../static/scripts/datatables.css"))),
